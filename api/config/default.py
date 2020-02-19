@@ -3,7 +3,7 @@ import os
 
 class Default(object):
     from dotenv import load_dotenv
-    #basedir = os.path.abspath(os.path.dirname(__file__))
+    basedir = os.path.abspath(os.path.dirname(__file__))
     #load_dotenv(os.path.join(basedir, '../../.flaskenv'))
     app_settings = os.environ.get('APP_SETTINGS')
 
@@ -29,5 +29,5 @@ class Default(object):
         'http://localhost:4000',
         'https://shipskart-2b3bb.web.app'
     ]
-    #TEMP_DIR = os.path.join(basedir, '../temp_export_files/')
+    TEMP_DIR = os.path.join(basedir, '../temp_export_files/')
 
