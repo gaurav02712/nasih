@@ -12,10 +12,13 @@ class BaseModel(db.Model, SurrogatePK):
     created_by = db.Column(db.Integer, default=0)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
     @classmethod
     def baseExcluded(cls):
         return ('is_deleted', 'created_at', 'created_by', 'updated_at')
+
 
 
 
