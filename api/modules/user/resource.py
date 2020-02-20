@@ -1,13 +1,14 @@
 from flask import request, g
-from flask_jwt_extended import get_jwt_identity
+from flask_bcrypt import generate_password_hash
 
 from api.common import KMessages
 from api.common.enums import RoleType
 from api.config.initialization import api
+from api.helpers.aws import AWSManager
 from api.helpers.extension import Resource
 from api.helpers.jwt_helper import jwt_required, JWT
 from api.helpers.response import ApiResponse
-from api.modules.user.business import perform_login, perform_logout
+from api.modules.user.business import perform_login, perform_logout, password_validation
 from api.modules.user.model import UserModel
 from api.modules.user.role.model import UserRole
 from api.modules.user.schema import UserSchema
@@ -43,7 +44,9 @@ class UserProfile(Resource):
         """Update user profile data"""
         from api.modules.user.model import UserModel
         json_data = self.update_parser.parse_args()
-        json_data['profileImage'] = None
+        profile_image = json_data['profile_image']
+        if profile_image:
+            json_data['profile_image_url'] = AWSManager().updateImage(json_data['profile_image'])
         user: UserModel = UserModel.get_by_id(g.user_id)
         user.update(**json_data)
         return ApiResponse.success(UserSchema().dump(user), 200)
@@ -89,3 +92,30 @@ class Logout(Resource):
         user_token = JWT.get_auth_token()
         perform_logout(user_token.token)
         return ApiResponse.success(None, 200, message=KMessages.LOGOUT_DONE)
+
+
+class UpdatePassword(Resource):
+    parser = UserModel.get_parser_update_password()
+
+    @ns_user.doc(security="Authorization")
+    @jwt_required
+    @ns_user.expect(parser)
+    def post(self):
+        """Update userpasword"""
+
+        sample = '12345'
+        password_hash_a = generate_password_hash(sample).decode('utf8')
+        password_hash_b = generate_password_hash(sample).decode('utf8')
+        if password_hash_a == password_hash_b:
+            print('Both are same.')
+
+        arg_json = self.parser.parse_args()
+        user: UserModel = UserModel.get_by_id(g.user_id)
+        authorized = user.check_password(arg_json['current_password'])
+        if not authorized:
+            return ApiResponse.error(None, 404, message=KMessages.CURRENT_PASSWORD_DIFFER)
+        new_password = arg_json['new_password']
+        password_validation(new_password)
+        user.password = generate_password_hash(new_password).decode('utf8')
+        user.update()
+        return ApiResponse.success(None, 200, message=KMessages.PASSWORD_CHANGE_SUCESSFULLY)

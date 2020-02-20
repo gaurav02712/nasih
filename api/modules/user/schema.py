@@ -9,9 +9,8 @@ class UserSchema(ma.ModelSchema):
 
     @validates("password")
     def validate_password(self, password):
-        min_lenght = 5
-        if len(password) < min_lenght:
-            raise ValidationError(f'Password length must be greater than {min_lenght}.')
+        from api.modules.user.business import password_validation
+        password_validation(password)
 
     class Meta:
         model = UserModel

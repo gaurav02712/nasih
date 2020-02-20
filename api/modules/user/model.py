@@ -22,6 +22,8 @@ class UserModel(BaseModel):
     varified_by = db.Column(db.Integer, nullable=False, default=0)
     device = db.relationship('DeviceInfoModel', cascade="all,delete")
     role = db.relationship('UserRole', uselist=False, cascade="all,delete", lazy=True)
+    profile_image_url = db.Column(db.String(255))
+
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -60,9 +62,16 @@ class UserModel(BaseModel):
     @classmethod
     def get_parser_user_profile_update(cls):
         parser = UserModel.get_parser_user_registration()
-        parser.add_argument('display_image', location='files', type=FileStorage)
+        parser.add_argument('profile_image', location='files', type=FileStorage)
         parser.remove_argument('password')
         parser.remove_argument('email')
+        return parser
+
+    @classmethod
+    def get_parser_update_password(cls):
+        parser = reqparse.RequestParser(bundle_errors=True, trim=True)
+        parser.add_argument('current_password', required=True, type=str)
+        parser.add_argument('new_password', required=True, type=str)
         return parser
 
 
