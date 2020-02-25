@@ -10,7 +10,7 @@ from api.modules.questionnaire.schema import QuestionSchema, UserQAnswerSchema
 from api.modules.user.model import UserModel
 from api.modules.user.schema import UserSchema
 
-ns_questionnaire = api.namespace('question', description='User Questionnaire Module')
+ns_questionnaire = api.namespace('questions', description='User Questionnaire Module')
 
 
 class Question(Resource):
