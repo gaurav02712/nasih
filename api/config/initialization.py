@@ -60,10 +60,7 @@ blueprint = Blueprint('AirOrder', __name__, url_prefix='/v1')
 api = Api(blueprint, authorizations=authorizations, title='Nasih', doc='/api/doc/', version='1.0.0',
           description='')
 bcrypt = Bcrypt()
-amadeus = Client(
-    client_id=os.getenv("amaedues_client_id"),
-    client_secret=os.getenv("amaedues_client_id")
-)
+amadeus = Client()
 
 # jwt class
 jwt = JWTManager()
