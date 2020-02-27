@@ -5,6 +5,7 @@ from api.config.staging import StagingConfig
 from api.config.initialization import blueprint, prepare_libraries, register_header
 from api.helpers import errorhandler
 
+
 app = Flask(__name__)
 
 

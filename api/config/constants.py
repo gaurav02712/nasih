@@ -4,3 +4,4 @@ class K:
     # S3_PRODUCT_IMG_FOLDER = 'product_img'
     # S3_UPLOAD_FOLDER = 'upload'
     S3_PROFILE_IMAGE = 'profile'
+
