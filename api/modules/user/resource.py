@@ -12,7 +12,6 @@ from api.modules.user.business import perform_login, perform_logout, password_va
 from api.modules.user.model import UserModel
 from api.modules.user.role.model import UserRole
 from api.modules.user.schema import UserSchema
-
 ns_user = api.namespace('user', description='User Profile Module')
 
 
@@ -31,6 +30,7 @@ class UserProfile(Resource):
         if user_id is None:
             user_id = g.user_id
         user = UserModel.get_by_id(user_id)
+
         if user is not None:
             return ApiResponse.success(UserSchema().dump(user), 200)
         return ApiResponse.error('User not found.', 402)
@@ -102,13 +102,6 @@ class UpdatePassword(Resource):
     @ns_user.expect(parser)
     def post(self):
         """Update userpasword"""
-
-        sample = '12345'
-        password_hash_a = generate_password_hash(sample).decode('utf8')
-        password_hash_b = generate_password_hash(sample).decode('utf8')
-        if password_hash_a == password_hash_b:
-            print('Both are same.')
-
         arg_json = self.parser.parse_args()
         user: UserModel = UserModel.get_by_id(g.user_id)
         authorized = user.check_password(arg_json['current_password'])

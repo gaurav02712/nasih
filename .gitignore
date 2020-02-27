@@ -109,3 +109,5 @@ api/templates/
 static/
 templates/
 venv/include/
+!/.gitignore
+!/.gitignore
