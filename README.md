@@ -14,7 +14,7 @@ $ pip install -r requirements.txt
 ```
 
 # How we work 
-```Never ever commit on Master branch```
+```Never ever commit on Master branch directly```
 1. Create a new new branch for every seprate module/task.
 2. Once you completed the task or done with sufficient ammount work on that, only then commit and push.
 3. Once you think your task is completed and done with a basic level testing from our own side, raise a pull request and assign a person for review.
