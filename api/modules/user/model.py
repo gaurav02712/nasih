@@ -24,7 +24,6 @@ class UserModel(BaseModel):
     role = db.relationship('UserRole', uselist=False, cascade="all,delete", lazy=True)
     profile_image_url = db.Column(db.String(255))
 
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.username = kwargs.get('username', self.email)
@@ -48,7 +47,7 @@ class UserModel(BaseModel):
         parser.add_argument('f_name', required=True, type=str)
         parser.add_argument('l_name', required=True, type=str)
         parser.add_argument('email', required=True, type=str)
-        parser.add_argument('date_of_birth', required=False, type=str, help='Date Of Birth (YYYY-MM-DD)')
+        parser.add_argument('date_of_birth', required=True, type=str, help='Date Of Birth (YYYY-MM-DD)')
         parser.add_argument('password', required=True)
         return parser
 

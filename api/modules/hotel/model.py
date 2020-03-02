@@ -1,4 +1,29 @@
 from api.common.base.model import BaseModel
+from api.config.initialization import db
+
+
+class CurrencyModel(db.Model):
+    __tablename__ = 'currency'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    country = db.Column(db.String(45), nullable=False)
+    currency = db.Column(db.String(45), nullable=False)
+    code = db.Column(db.String(45), nullable=False)
+    symbol = db.Column(db.String(45), nullable=False)
+
+
+class IATACodeModel(BaseModel):
+    __tablename__ = 'iata_code'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(90), nullable=False)
+    city = db.Column(db.String(45), nullable=True)
+    country = db.Column(db.String(45), nullable=False)
+    iata = db.Column(db.String(4), nullable=False)
+    iaco = db.Column(db.String(9), nullable=False)
+    latitude = db.Column(db.Float, nullable=False)
+    longitude = db.Column(db.Float, nullable=False)
+    timezone = db.Column(db.String(45), nullable=False)
+    dst = db.Column(db.String(45), nullable=False)
 
 
 class HotelModel(BaseModel):
@@ -19,7 +44,7 @@ class HotelModel(BaseModel):
         parser.add_argument('checkOutDate', type=str, required=False, help='The lowest accepted value is checkInDate+1')
         parser.add_argument('roomQuantity', type=int, required=False, help='number of rooms (1-9)')
         parser.add_argument('adults', type=int, required=False, help='number of adult guests (1-9) per room')
-        parser.add_argument('childAges', type=list, required=False, action='split', help='''comma separated list of ages
+        parser.add_argument('childAges', type=int, required=False, action='split', help='''comma separated list of ages
         of each child.
         If several children have the same age, their ages should be repeated in the list''')
         parser.add_argument('hotelName', type=str, required=False, help='''Search by Hotel Name.
@@ -59,8 +84,16 @@ class HotelModel(BaseModel):
             "SAFE_DEP_BOX",
             "FITNESS_CENTER"
         ]
-        parser.add_argument('amenities', type=list, choices=amenities, action='append', required=False)
+        parser.add_argument('amenities', choices=amenities, action='append', required=False)
         ratings = [5, 4, 3, 2, 1]
         parser.add_argument('ratings', type=list, choices=ratings, help='''hotel stars. Up to four values can be 
         requested at the same time in a comma separated list''', action='append', required=False)
+        return parser
+
+    @classmethod
+    def sample_parser(cls):
+        from flask_restplus import reqparse
+        parser = reqparse.RequestParser(bundle_errors=True, trim=True)
+        # parser.add_argument('name', type=str, required=False, location="form")
+        parser.add_argument('name', type=str, required=False)
         return parser

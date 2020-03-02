@@ -1,7 +1,9 @@
 from flask import request, g
 
 from api.common import KMessages
+from api.common.enums import RoleType
 from api.config.initialization import api
+from api.helpers.decorators import allow
 from api.helpers.extension import Resource
 from api.helpers.jwt_helper import jwt_required
 from api.helpers.response import ApiResponse
@@ -17,6 +19,7 @@ class Question(Resource):
     # @ns_questionnaire.doc(params={'user_id': 'an Int value'})
     @ns_questionnaire.doc(security="Authorization")
     @jwt_required
+    # @allow([RoleType.SUPER_ADMIN])
     def get(self):
         """Get all questionnaire"""
         questions = QuestionModel().find_all()
@@ -28,6 +31,7 @@ class Question(Resource):
     @ns_questionnaire.doc(security="Authorization")
     @jwt_required
     @ns_questionnaire.expect(create_question_parser)
+    @allow([RoleType.SUPER_ADMIN])
     def post(self):
         """add new questionnaire and options"""
         param_dict = self.create_question_parser.parse_args()
@@ -41,6 +45,7 @@ class Question(Resource):
 
     @ns_questionnaire.doc(security="Authorization")
     @jwt_required
+    @allow([RoleType.SUPER_ADMIN])
     def delete(self, question_id: int):
         """new questionnaire and options"""
         question = QuestionModel().get_by_id(question_id)

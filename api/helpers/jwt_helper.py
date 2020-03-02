@@ -8,9 +8,6 @@ from api.modules.user_token import UserToken
 from api.helpers.response import ApiResponse
 
 
-
-
-
 def jwt_required(fn):
     @wraps(fn)
     def wrapper(self, *args, **kwargs):
