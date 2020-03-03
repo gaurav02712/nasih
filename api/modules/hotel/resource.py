@@ -19,7 +19,7 @@ class Hotel(Resource):
 
     @ns_hotel.expect(parser)
     @ns_hotel.doc(security="Authorization")
-    # @jwt_required
+    @jwt_required
     def get(self):
         try:
             params = self.parser.parse_args()
@@ -31,6 +31,23 @@ class Hotel(Resource):
             response = amadeus.shopping.hotel_offers.get(**params)
             mf_data = format_muslim_friendly_data(response.data)
             return ApiResponse.success(mf_data, 200)
+        except ResponseError as error:
+            print(f'Error is ----------{error}')
+            return ApiResponse.error(error.response.body, 402)
+
+
+class HotelOffer(Resource):
+    parser = HotelModel().get_parser_hotel_offers()
+
+    @ns_hotel.expect(parser)
+    @ns_hotel.doc(security="Authorization")
+    @jwt_required
+    def get(self):
+        try:
+            params = self.parser.parse_args()
+            params = cleanNullItems(params)
+            hotel_offers = amadeus.shopping.hotel_offers_by_hotel.get(**params)
+            return ApiResponse.success(hotel_offers.data, 200)
         except ResponseError as error:
             print(f'Error is ----------{error}')
             return ApiResponse.error(error.response.body, 402)

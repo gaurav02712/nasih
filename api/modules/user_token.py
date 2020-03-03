@@ -27,7 +27,7 @@ class UserToken(BaseModel):
     def is_token_valid(cls, auth_token):
         res = cls.query.filter(cls.token == auth_token,
                                cls.expired_at >= datetime.utcnow(),
-                               cls.is_deleted is False).first()
+                               cls.is_deleted.is_(False)).first()
         return res if True else False
 
     @classmethod

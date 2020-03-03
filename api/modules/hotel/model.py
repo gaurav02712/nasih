@@ -97,9 +97,22 @@ class HotelModel(BaseModel):
         return parser
 
     @classmethod
+    def get_parser_hotel_offers(cls):
+        from flask_restplus import reqparse
+        parser = reqparse.RequestParser(bundle_errors=True, trim=True)
+        parser.add_argument('hotelId', type=str, required=True)
+        parser.add_argument('checkInDate', type=str, required=False, help='''Format YYYY-MM-DD.
+                   The lowest accepted value is the present date (no dates in the past).
+                   If not present, the default value will be todays date in the GMT timezone.''')
+        parser.add_argument('checkOutDate', type=str, required=False, help='The lowest accepted value is checkInDate+1')
+        parser.add_argument('roomQuantity', type=int, required=False, help='number of rooms (1-9)')
+        parser.add_argument('adults', type=int, required=False, help='number of adult guests (1-9) per room')
+        parser.add_argument('childAges', type=int, required=False, action='split', help='''comma separated list of ages
+                  of each child.''')
+        return parser
+
+    @classmethod
     def sample_parser(cls):
         from flask_restplus import reqparse
         parser = reqparse.RequestParser(bundle_errors=True, trim=True)
-        # parser.add_argument('name', type=str, required=False, location="form")
-        parser.add_argument('name', type=str, required=False)
         return parser

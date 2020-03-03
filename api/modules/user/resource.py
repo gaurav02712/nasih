@@ -28,10 +28,10 @@ ns_user = api.namespace('user', description='User Profile Module')
 class User(Resource):
     parser = base_pagination_parser.copy()
 
-    # @ns_user.doc(security="Authorization")
-    # @jwt_required
+    @ns_user.doc(security="Authorization")
+    @jwt_required
     @ns_user.expect(parser)
-    # @allow([RoleType.SUPER_ADMIN])
+    @allow([RoleType.SUPER_ADMIN])
     def get(self):
         """Get user listing"""
         args = self.parser.parse_args()
