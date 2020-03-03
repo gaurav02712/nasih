@@ -1,8 +1,7 @@
-import flask_jwt
 from marshmallow import ValidationError
 
 from api.helpers.jwt_helper import JWT
-from api.modules import UserToken
+from api.modules.user_token import UserToken
 from api.modules.user.model import UserModel
 from api.modules.user.schema import UserSchema
 

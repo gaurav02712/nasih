@@ -2,14 +2,13 @@ import os
 from flask import Flask
 from api.config.development import DevConfig
 from api.config.staging import StagingConfig
-from api.config.initialization import blueprint, prepare_libraries, register_header
 from api.helpers import errorhandler
-
 
 app = Flask(__name__)
 
 
 def create_app(config_obj):
+    from api.config.initialization import blueprint, prepare_libraries, register_header
     app.config.from_object(config_obj)
     prepare_libraries(app)
     app.register_blueprint(blueprint)

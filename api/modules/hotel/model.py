@@ -1,4 +1,5 @@
 from api.common.base.model import BaseModel
+from api.common.base.parsers import base_pagination_parser
 from api.config.initialization import db
 
 
@@ -24,6 +25,11 @@ class IATACodeModel(BaseModel):
     longitude = db.Column(db.Float, nullable=False)
     timezone = db.Column(db.String(45), nullable=False)
     dst = db.Column(db.String(45), nullable=False)
+
+    @classmethod
+    def get_parser_search(cls):
+        parser = base_pagination_parser.copy()
+        return parser
 
 
 class HotelModel(BaseModel):
