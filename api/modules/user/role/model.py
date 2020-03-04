@@ -8,7 +8,6 @@ class UserRole(db.Model):
     role_type = db.Column(db.String)
     user_id = db.Column(db.Integer(), db.ForeignKey('user.id', ondelete='CASCADE'), unique=True)
 
-
     # def __init__(self, role_type: str, user_id: int):
     #     if RoleType.has_value(role_type):
     #         self.role_type = role_type

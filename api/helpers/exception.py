@@ -6,7 +6,7 @@ class InvalidUsage(Exception):
     status_code = 500
 
     def __init__(self, errors, status_code=500, payload=None):
-        #db.session.rollback()
+        # db.session.rollback()
         Exception.__init__(self)
         self.errors = errors
         self.status_code = status_code
@@ -21,6 +21,3 @@ class InvalidUsage(Exception):
         print(status_code)
         error, code = ApiResponse.error(error=error, status_code=status_code, message='')
         return cls(errors=error, status_code=code)
-
-
-

@@ -1,1 +1,1 @@
-from api.modules import __init__
+import api.modules
