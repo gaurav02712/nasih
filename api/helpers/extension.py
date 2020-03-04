@@ -21,3 +21,11 @@ class Resource(flask_restplus.Resource):
         # if errors:
         #     raise InvalidUsage.validationError(errors, 422)
         return data
+
+
+def cleanNullItems(d):
+    return {k: v for k, v in d.items() if v is not None}
+
+
+def list_to_csv(data_list: list) -> str:
+    return ', '.join(map(str, data_list))

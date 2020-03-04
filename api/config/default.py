@@ -30,4 +30,3 @@ class Default(object):
         'https://shipskart-2b3bb.web.app'
     ]
     TEMP_DIR = os.path.join(basedir, '../temp_export_files/')
-

@@ -41,5 +41,5 @@ class QuestionModel(BaseModel):
         parser = reqparse.RequestParser(bundle_errors=True, trim=True)
         parser.add_argument('question', required=True, type=str)
         parser.add_argument('option', required=True, action='append')
-        parser.add_argument('option_icon_name', required=False, action='append')
+        parser.add_argument('option_icon_name', required=True, action='append')
         return parser

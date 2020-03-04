@@ -2,16 +2,20 @@ from flask import request, g
 from flask_bcrypt import generate_password_hash
 
 from api.common import KMessages
+from api.common.base.parsers import base_pagination_parser
 from api.common.enums import RoleType
 from api.config.initialization import api
 from api.helpers.aws import AWSManager
+from api.helpers.decorators import allow
 from api.helpers.extension import Resource
 from api.helpers.jwt_helper import jwt_required, JWT
+from api.helpers.pagination import get_paginated_list
 from api.helpers.response import ApiResponse
 from api.modules.user.business import perform_login, perform_logout, password_validation
 from api.modules.user.model import UserModel
 from api.modules.user.role.model import UserRole
 from api.modules.user.schema import UserSchema
+
 ns_user = api.namespace('user', description='User Profile Module')
 
 
@@ -20,7 +24,25 @@ ns_user = api.namespace('user', description='User Profile Module')
 # def index():
 #     return "Hello, World!"
 
+
+class User(Resource):
+    parser = base_pagination_parser.copy()
+
+    @ns_user.doc(security="Authorization")
+    @jwt_required
+    @ns_user.expect(parser)
+    @allow([RoleType.SUPER_ADMIN])
+    def get(self):
+        """Get user listing"""
+        args = self.parser.parse_args()
+        page = args.page
+        per_page = args.limit
+        user_paginatior = UserModel.query.paginate(page=page, per_page=per_page)
+        return ApiResponse.success(get_paginated_list(user_paginatior, UserSchema(many=True), per_page), 200)
+
+
 class UserProfile(Resource):
+
     @ns_user.doc(params={'user_id': 'an Int value'})
     @ns_user.doc(security="Authorization")
     @jwt_required

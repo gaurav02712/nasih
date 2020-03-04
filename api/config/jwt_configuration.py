@@ -7,4 +7,4 @@ def add_claims_to_access_token(user):
 
 
 def user_identity_lookup(user):
-    return {'email': user.username, 'user_id': user.id,}
+    return {'email': user.username, 'user_id': user.id, }
