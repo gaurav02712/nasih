@@ -116,3 +116,48 @@ class HotelModel(BaseModel):
         from flask_restplus import reqparse
         parser = reqparse.RequestParser(bundle_errors=True, trim=True)
         return parser
+
+
+class Booking(db.Model):
+    __tablename__ = 'booking'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    booking_id = db.Column(db.String(45), nullable=False)
+    providerConfirmationId = db.Column(db.String(45), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    @classmethod
+    def get_parser_booking(cls):
+        from flask_restplus import reqparse
+        parser = reqparse.RequestParser(bundle_errors=True, trim=True)
+        parser.add_argument('offerId', type=str, required=True)
+        guests = '''sample - [
+                      {
+                        "name": {
+                          "title": "MR",
+                          "firstName": "BOB",
+                          "lastName": "SMITH"
+                        },
+                        "contact": {
+                          "phone": "+33679278416",
+                          "email": "bob.smith@email.com"
+                        }
+                      }
+                    ]'''
+
+        parser.add_argument('guests', type=str, required=True, location='json', help=guests)
+        payments = '''sample - [
+      {
+        "method": "creditCard",
+        "card": {
+          "vendorCode": "VI",
+          "cardNumber": "4111111111111111",
+          "expiryDate": "2023-01"
+        }
+      }
+    ]'''
+        parser.add_argument('payments', type=str, required=False, location='json', help=payments)
+
+        help = '''offerId, guests, payments and 
+        optional rooms for the repartition (when used the rooms array items must match the shopping offer 
+        roomQuantity)'''
+        return parser
