@@ -43,7 +43,7 @@ class User(Resource):
 
 class UserProfile(Resource):
 
-    @ns_user.doc(params={'user_id': 'an Int value'})
+    @ns_user.doc(params={'user_id': 'optional user id (Int value), if we need to find other user details '})
     @ns_user.doc(security="Authorization")
     @jwt_required
     def get(self):

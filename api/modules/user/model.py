@@ -17,7 +17,7 @@ class UserModel(BaseModel):
     email = db.Column(db.String(45), nullable=False, unique=True)
     password = db.Column(db.String(355), nullable=False, unique=False)
     username = db.Column(db.String(45), nullable=True, unique=True)
-    date_of_birth = db.Column(db.Date, nullable=False)
+    date_of_birth = db.Column(db.Date, nullable=True)
     is_varified = db.Column(db.Integer, nullable=False, default=0)
     varified_by = db.Column(db.Integer, nullable=False, default=0)
     device = db.relationship('DeviceInfoModel', cascade="all,delete")
@@ -47,7 +47,7 @@ class UserModel(BaseModel):
         parser.add_argument('f_name', required=True, type=str)
         parser.add_argument('l_name', required=True, type=str)
         parser.add_argument('email', required=True, type=str)
-        parser.add_argument('date_of_birth', required=True, type=str, help='Date Of Birth (YYYY-MM-DD)')
+        parser.add_argument('date_of_birth', required=False, type=str, help='Date Of Birth (YYYY-MM-DD)')
         parser.add_argument('password', required=True)
         return parser
 
