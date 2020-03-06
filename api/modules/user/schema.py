@@ -4,7 +4,7 @@ from api.modules.user.model import UserModel
 
 
 class UserSchema(ma.ModelSchema):
-    date_of_birth = fields.Date('%Y-%m-%d')
+    # date_of_birth = fields.Date('%Y-%m-%d')
     password = fields.String(load_only=True)
 
     @validates("password")

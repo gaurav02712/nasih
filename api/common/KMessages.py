@@ -3,7 +3,8 @@ NO_EMAIL_ID = "No user registered with given email id."
 OTP_SEND = "Your OTP has been send to your mobile and Email id. {}"
 INVALID_LOGIN_AUTH = 'Invalid email and password combination.'
 DATA_SAVED = 'Saved successfully'
-
+CURRENT_PASSWORD_DIFFER = 'Invalid current password.'
+PASSWORD_CHANGE_SUCESSFULLY = 'Password change sucessfully.'
 
 LOGIN_DONE = "User login successfully"
 REGISTRATION_DONE = "User registred successfully"
@@ -48,5 +49,3 @@ LOGOUT_DONE = "User Logout successfully"
 # GROUP_OFFER_ADDED = "Group Offer {}".format(ADDED_SUCESSFULLY)
 # NOT_FOUND_GROUP_OFFER = NOT_FOUND.format('Group Offer')
 # NOT_FOUND_OFFER = NOT_FOUND.format('Offer')
-
-

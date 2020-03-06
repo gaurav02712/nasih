@@ -40,4 +40,25 @@ def make_admin(user_id: int):
     return ApiResponse.error('User not found.', 402)
 
 
+def register_social_media(json, newuser):
+    from api.modules.user.role.model import UserRole
+    from api.common.enums import RoleType
+    if json['social_id']:
+        user = UserModel.query.filter(UserModel.social_id == json['social_id'], UserModel.is_deleted == False).first()
+        if user is None and json['email']:
+            user = UserModel.query.filter(UserModel.email == json['email'], UserModel.is_deleted == False).first()
+            if user:
+                user.social_id = json['social_id']
+                user.register_by = user.register_by if user.register_by else json['register_by']
+                user.f_name = user.f_name if user.f_name else json['f_name']
+                user.l_name = user.l_name if user.l_name else json['l_name']
+                user.updtae()
+            else:
+                user = newuser
+                user.role = UserRole(RoleType.USER)
+                user.save()
+            return user
+    return False
+
+
 update_parser = UserModel.get_parser_user_profile_update()
