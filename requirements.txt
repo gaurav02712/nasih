@@ -31,8 +31,8 @@ Mako==1.1.1
 MarkupSafe==1.1.1
 marshmallow==3.5.0
 marshmallow-sqlalchemy==0.22.2
-# psycopg2==2.8.4
-psycopg2==2.7.5
+psycopg2==2.8.4
+#psycopg2==2.7.5
 pycparser==2.19
 PyJWT==1.7.1
 pyrsistent==0.15.7

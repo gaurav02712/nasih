@@ -39,6 +39,7 @@ def make_admin(user_id: int):
 
     return ApiResponse.error('User not found.', 402)
 
+
 def register_social_media(json, newuser):
     from api.modules.user.role.model import UserRole
     from api.common.enums import RoleType

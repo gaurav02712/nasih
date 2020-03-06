@@ -6,7 +6,6 @@ from api.common.base.model import BaseModel
 from api.config.initialization import db
 from flask_restplus import reqparse
 from sqlalchemy.orm import validates
-
 from api.modules.user.role.model import UserRole
 
 
@@ -19,9 +18,8 @@ class UserModel(BaseModel):
     username = db.Column(db.String(45), nullable=True, unique=True)
     date_of_birth = db.Column(db.Date)
     is_varified = db.Column(db.Integer, nullable=False, default=0)
-    varified_by = db.Column(db.Integer, nullable=False, default=0)
-    social_id = db.Column(db.String(50), nullable=False)
-    register_by = db.Column(db.String(50), nullable=False, default='Nasih')
+    social_id = db.Column(db.String(50), nullable=True)
+    register_by = db.Column(db.String(50), nullable=True, default='Nasih')
     device = db.relationship('DeviceInfoModel', cascade="all,delete")
     role = db.relationship('UserRole', uselist=False, cascade="all,delete", lazy=True)
     profile_image_url = db.Column(db.String(255))
@@ -29,7 +27,7 @@ class UserModel(BaseModel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.username = kwargs.get('username', self.email)
-        #self.password = generate_password_hash(self.password).decode('utf8')
+        # self.password = generate_password_hash(self.password).decode('utf8')
 
     @validates('email')
     def validate_email(self, key, email):
@@ -39,6 +37,7 @@ class UserModel(BaseModel):
             raise ValidationError('Email id is alredy registered.')
         else:
             return email
+
     def create_password(self, password):
         return generate_password_hash(self.password).decode('utf8')
 
@@ -59,8 +58,9 @@ class UserModel(BaseModel):
     def get_parser_user_registration_social(cls):
         parser = UserModel.get_parser_user_registration()
         parser.remove_argument('password')
-        parser.add_argument('social_id',required=True, type=str)
-        parser.add_argument('register_by', required=True, type=str,help='facebook/google')
+        parser.add_argument('social_id', required=True, type=str)
+        options = ['nasih', 'google', 'facebook']
+        parser.add_argument('register_by', required=True, choices=options, type=str, help='facebook/google')
         parser.replace_argument('date_of_birth', required=False, type=str, help='Date Of Birth (YYYY-MM-DD)')
         return parser
 

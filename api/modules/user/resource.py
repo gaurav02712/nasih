@@ -11,7 +11,7 @@ from api.helpers.extension import Resource
 from api.helpers.jwt_helper import jwt_required, JWT
 from api.helpers.pagination import get_paginated_list
 from api.helpers.response import ApiResponse
-from api.modules.user.business import perform_login, perform_logout, password_validation,register_social_media
+from api.modules.user.business import perform_login, perform_logout, password_validation, register_social_media
 from api.modules.user.model import UserModel
 from api.modules.user.role.model import UserRole
 from api.modules.user.schema import UserSchema
@@ -95,7 +95,7 @@ class Login(Resource):
     def post(self):
         """Login via Email"""
         json = self.parser.parse_args()
-        user  = register_social_media(json)
+        user = register_social_media(json)
         if user:
             loggeding_data = perform_login(user)
             return ApiResponse.success(loggeding_data, 200, message=KMessages.LOGIN_DONE)
@@ -111,19 +111,20 @@ class Login(Resource):
         else:
             return ApiResponse.error(None, 404, message=KMessages.NO_EMAIL_ID)
 
-class LoginSocialMedia(Resource):
+
+class LoginSocial(Resource):
     parser = UserModel.get_parser_user_registration_social()
+
     @ns_user.expect(parser)
     def post(self):
-        """Login via Email"""
+        """Login/registration via Social Account"""
         json = self.parser.parse_args()
         newuser = self.validObject(self.parser, UserSchema())
-        user  = register_social_media(json,newuser)
+        user = register_social_media(json, newuser)
         if user:
             loggeding_data = perform_login(user)
             return ApiResponse.success(loggeding_data, 200, message=KMessages.LOGIN_DONE)
         return ApiResponse.error(None, 404, message=KMessages.INVALID_LOGIN_AUTH)
-
 
 
 class Logout(Resource):
