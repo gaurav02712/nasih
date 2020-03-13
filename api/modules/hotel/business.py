@@ -2,6 +2,8 @@ from flask import jsonify
 
 from api.config.initialization import db
 
+'''Here data will dome from amadeus server and will be filter here as per out AI'''
+
 
 def format_muslim_friendly_data(data: dict) -> dict:
     return data
