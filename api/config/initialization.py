@@ -62,7 +62,8 @@ api = Api(blueprint, authorizations=authorizations, title='Nasih', doc='/api/doc
 bcrypt = Bcrypt()
 amadeus = Client(
     client_id=os.environ.get('AMADEUS_CLIENT_ID'),
-    client_secret=os.environ.get('AMADEUS_CLIENT_SECRET')
+    client_secret=os.environ.get('AMADEUS_CLIENT_SECRET'),
+    hostname=os.environ.get('AMADEUS_ENVIROMENT'),
 )
 
 # jwt class

@@ -25,6 +25,8 @@ class IATACodeModel(BaseModel):
     longitude = db.Column(db.Float, nullable=False)
     timezone = db.Column(db.String(45), nullable=False)
     dst = db.Column(db.String(45), nullable=False)
+    data_available = db.Column(db.Boolean, nullable=True)
+    data_extracted = db.Column(db.Boolean, nullable=True)
 
     @classmethod
     def get_parser_search(cls):
