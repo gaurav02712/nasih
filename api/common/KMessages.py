@@ -3,7 +3,10 @@ NO_EMAIL_ID = "No user registered with given email id."
 OTP_SEND = "Your OTP has been send to your mobile and Email id. {}"
 INVALID_LOGIN_AUTH = 'Invalid email and password combination.'
 DATA_SAVED = 'Saved successfully'
-
+CURRENT_PASSWORD_DIFFER = 'Current password is not valid.'
+PASSWORD_CHANGE_SUCESSFULLY = 'Your password has change sucessfully.'
+RESET_PASSWORD_TOKEN_SEND = 'Secure token to reset password has been sent on you registered email id.'
+INVALID_TOKEN = 'Invalid authentication'
 
 LOGIN_DONE = "User login successfully"
 REGISTRATION_DONE = "User registred successfully"

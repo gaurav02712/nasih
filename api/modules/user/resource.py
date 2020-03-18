@@ -8,10 +8,11 @@ from api.helpers.aws import AWSManager
 from api.helpers.extension import Resource
 from api.helpers.jwt_helper import jwt_required, JWT
 from api.helpers.response import ApiResponse
-from api.modules.user.business import perform_login, perform_logout, password_validation
+from api.modules.user.business import perform_login, perform_logout, password_validation, verify_reset_password_token
 from api.modules.user.model import UserModel
 from api.modules.user.role.model import UserRole
 from api.modules.user.schema import UserSchema
+
 ns_user = api.namespace('user', description='User Profile Module')
 
 
@@ -111,4 +112,40 @@ class UpdatePassword(Resource):
         password_validation(new_password)
         user.password = generate_password_hash(new_password).decode('utf8')
         user.update()
+        return ApiResponse.success(None, 200, message=KMessages.PASSWORD_CHANGE_SUCESSFULLY)
+
+
+class ForgetPasswrordToken(Resource):
+    parser = UserModel.get_parser_forget_password()
+
+    @ns_user.expect(parser)
+    def post(self):
+        """Get Token for Forget password"""
+        arg_json = self.parser.parse_args()
+        email = arg_json['email']
+        user: UserModel = UserModel.query.filter(UserModel.email == email).first()
+        if user:
+            from api.helpers.email import send_password_reset_request_email
+            send_password_reset_request_email(user)
+            return ApiResponse.success(None, 200, message=KMessages.RESET_PASSWORD_TOKEN_SEND)
+        return ApiResponse.error(None, 404, message=KMessages.NO_EMAIL_ID)
+
+
+class ResetPassword(Resource):
+    parser = UserModel.get_parser_reset_password()
+
+    @ns_user.expect(parser)
+    def post(self):
+        """Reset your password with token"""
+        arg_json = self.parser.parse_args()
+        user: UserModel = verify_reset_password_token(arg_json['token'])
+        if not user:
+            return ApiResponse.error(None, 404, message=KMessages.INVALID_TOKEN)
+        arg_json = self.parser.parse_args()
+        new_password = arg_json['new_password']
+        password_validation(new_password)
+        user.password = generate_password_hash(new_password).decode('utf8')
+        user.update()
+        from api.helpers.email import send_password_reset_confirmation_email
+        send_password_reset_confirmation_email(user)
         return ApiResponse.success(None, 200, message=KMessages.PASSWORD_CHANGE_SUCESSFULLY)

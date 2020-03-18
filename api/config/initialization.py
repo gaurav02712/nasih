@@ -5,6 +5,7 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy, Model
 from flask_restplus import Api
 from flask_bcrypt import Bcrypt
+from flask_mail import Mail
 
 
 from api.config.jwt_configuration import check_if_token_in_blacklist, add_claims_to_access_token, user_identity_lookup
@@ -58,7 +59,7 @@ blueprint = Blueprint('AirOrder', __name__, url_prefix='/v1')
 api = Api(blueprint, authorizations=authorizations, title='Nasih', doc='/api/doc/', version='1.0.0',
           description='')
 bcrypt = Bcrypt()
-
+mail = Mail()
 
 
 # jwt class
@@ -67,7 +68,6 @@ jwt.token_in_blacklist_loader(check_if_token_in_blacklist)
 jwt.user_claims_loader(add_claims_to_access_token)
 jwt.user_identity_loader(user_identity_lookup)
 jwt._set_error_handler_callbacks(api)
-
 
 
 # def check_if_token_in_blacklist(decrypted_token):
@@ -83,8 +83,6 @@ jwt._set_error_handler_callbacks(api)
 #     return {'username': user.username, 'user_id': user.id, 'user_type': user.type}
 
 
-
-
 def prepare_libraries(app):
     # bcrypt.init_app(app)
     # cache.init_app(app)
@@ -93,6 +91,7 @@ def prepare_libraries(app):
     migrate.init_app(app, db)
     jwt.init_app(app)
     bcrypt.init_app(app)
+    mail.init_app(app)
 
 
 def register_header(app):
@@ -102,7 +101,6 @@ def register_header(app):
         response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
         response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
         return response
-
 
 
 def get_unique_slug(self):
