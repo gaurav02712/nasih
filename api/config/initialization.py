@@ -1,5 +1,3 @@
-import os
-
 from flask import Blueprint
 from flask_jwt_extended import JWTManager
 from flask_marshmallow import Marshmallow
@@ -73,6 +71,7 @@ jwt.user_identity_loader(user_identity_lookup)
 jwt._set_error_handler_callbacks(api)
 
 
+
 # def check_if_token_in_blacklist(decrypted_token):
 #     jti = decrypted_token['jti']
 #
@@ -86,10 +85,11 @@ jwt._set_error_handler_callbacks(api)
 #     return {'username': user.username, 'user_id': user.id, 'user_type': user.type}
 
 
+
+
 def prepare_libraries(app):
     # bcrypt.init_app(app)
     # cache.init_app(app)
-
     db.init_app(app)
     ma.init_app(app)
     migrate.init_app(app, db)
@@ -104,6 +104,7 @@ def register_header(app):
         response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
         response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
         return response
+
 
 
 def get_unique_slug(self):
