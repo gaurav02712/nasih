@@ -1,12 +1,14 @@
 import os
 
+from dotenv import load_dotenv
+
 
 class Default(object):
     # from dotenv import load_dotenv
     basedir = os.path.abspath(os.path.dirname(__file__))
-  #  load_dotenv(os.path.join(basedir, '../../.flaskenv'))
+    load_dotenv(os.path.join(basedir, '../../.flaskenv'))
     app_settings = os.environ.get('APP_SETTINGS')
-
+    DEBUG = True
     # You need to replace the next values with the appropriate values for your configuration
     SQLALCHEMY_ECHO = True
     SQLALCHEMY_TRACK_MODIFICATIONS = False
