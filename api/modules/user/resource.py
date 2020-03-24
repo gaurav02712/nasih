@@ -8,10 +8,12 @@ from api.helpers.aws import AWSManager
 from api.helpers.extension import Resource
 from api.helpers.jwt_helper import jwt_required, JWT
 from api.helpers.response import ApiResponse
-from api.modules.user.business import perform_login, perform_logout, password_validation, register_social_media
+from api.modules.user.business import perform_login, perform_logout, password_validation, register_social_media, \
+    verify_reset_password_token
 from api.modules.user.model import UserModel
 from api.modules.user.role.model import UserRole
 from api.modules.user.schema import UserSchema
+
 ns_user = api.namespace('user', description='User Profile Module')
 
 
@@ -60,6 +62,7 @@ class Registration(Resource):
         """Registration via Email"""
         user: UserModel = self.validObject(self.parser, UserSchema())
         user.role = UserRole(RoleType.USER)
+        user.password = user.create_password()
         user.save()
         loggeding_data = perform_login(user)
         return ApiResponse.success(loggeding_data, 200, message=KMessages.REGISTRATION_DONE)
@@ -72,7 +75,12 @@ class Login(Resource):
     def post(self):
         """Login via Email"""
         json = self.parser.parse_args()
-        user: UserModel = UserModel.query.filter(UserModel.email == json['email']).first()
+        user = register_social_media(json)
+        if user:
+            loggeding_data = perform_login(user)
+            return ApiResponse.success(loggeding_data, 200, message=KMessages.LOGIN_DONE)
+        userquery = UserModel.query.filter(UserModel.email == json['email'], UserModel.is_deleted == False)
+        user = userquery.first()
         if user is not None:
             authorized = user.check_password(json['password'])
             if authorized:
@@ -82,6 +90,21 @@ class Login(Resource):
                 return ApiResponse.error(None, 404, message=KMessages.INVALID_LOGIN_AUTH)
         else:
             return ApiResponse.error(None, 404, message=KMessages.NO_EMAIL_ID)
+
+
+class LoginSocial(Resource):
+    parser = UserModel.get_parser_user_registration_social()
+
+    @ns_user.expect(parser)
+    def post(self):
+        """Login via Email"""
+        json = self.parser.parse_args()
+        newuser = self.validObject(self.parser, UserSchema())
+        user = register_social_media(json, newuser)
+        if user:
+            loggeding_data = perform_login(user)
+            return ApiResponse.success(loggeding_data, 200, message=KMessages.LOGIN_DONE)
+        return ApiResponse.error(None, 404, message=KMessages.INVALID_LOGIN_AUTH)
 
 
 class Logout(Resource):
@@ -111,4 +134,40 @@ class UpdatePassword(Resource):
         password_validation(new_password)
         user.password = generate_password_hash(new_password).decode('utf8')
         user.update()
+        return ApiResponse.success(None, 200, message=KMessages.PASSWORD_CHANGE_SUCESSFULLY)
+
+
+class ForgetPasswrordToken(Resource):
+    parser = UserModel.get_parser_forget_password()
+
+    @ns_user.expect(parser)
+    def post(self):
+        """Get Token for Forget password"""
+        arg_json = self.parser.parse_args()
+        email = arg_json['email']
+        user: UserModel = UserModel.query.filter(UserModel.email == email).first()
+        if user:
+            from api.helpers.email import send_password_reset_request_email
+            send_password_reset_request_email(user)
+            return ApiResponse.success(None, 200, message=KMessages.RESET_PASSWORD_TOKEN_SEND)
+        return ApiResponse.error(None, 404, message=KMessages.NO_EMAIL_ID)
+
+
+class ResetPassword(Resource):
+    parser = UserModel.get_parser_reset_password()
+
+    @ns_user.expect(parser)
+    def post(self):
+        """Reset your password with token"""
+        arg_json = self.parser.parse_args()
+        user: UserModel = verify_reset_password_token(arg_json['token'])
+        if not user:
+            return ApiResponse.error(None, 404, message=KMessages.INVALID_TOKEN)
+        arg_json = self.parser.parse_args()
+        new_password = arg_json['new_password']
+        password_validation(new_password)
+        user.password = generate_password_hash(new_password).decode('utf8')
+        user.update()
+        from api.helpers.email import send_password_reset_confirmation_email
+        send_password_reset_confirmation_email(user)
         return ApiResponse.success(None, 200, message=KMessages.PASSWORD_CHANGE_SUCESSFULLY)

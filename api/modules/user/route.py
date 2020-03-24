@@ -1,4 +1,5 @@
-from api.modules.user.resource import ns_user, UserProfile, Registration, Login, Logout, UpdatePassword
+from api.modules.user.resource import ns_user, UserProfile, Registration, Login, Logout, UpdatePassword, \
+    ForgetPasswrordToken, ResetPassword, LoginSocial
 
 ns_user.add_resource(UserProfile, '/')
 ns_user.add_resource(Registration, '/registration')

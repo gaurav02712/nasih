@@ -38,7 +38,7 @@ class UserModel(BaseModel):
         else:
             return email
 
-    def create_password(self, password):
+    def create_password(self):
         return generate_password_hash(self.password).decode('utf8')
 
     def check_password(self, password):
@@ -83,6 +83,19 @@ class UserModel(BaseModel):
     def get_parser_update_password(cls):
         parser = reqparse.RequestParser(bundle_errors=True, trim=True)
         parser.add_argument('current_password', required=True, type=str)
+        parser.add_argument('new_password', required=True, type=str)
+        return parser
+
+    @classmethod
+    def get_parser_forget_password(cls):
+        parser = reqparse.RequestParser(bundle_errors=True, trim=True)
+        parser.add_argument('email', required=True, type=str)
+        return parser
+
+    @classmethod
+    def get_parser_reset_password(cls):
+        parser = reqparse.RequestParser(bundle_errors=True, trim=True)
+        parser.add_argument('token', required=True, type=str)
         parser.add_argument('new_password', required=True, type=str)
         return parser
 

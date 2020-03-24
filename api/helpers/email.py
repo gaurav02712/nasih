@@ -3,10 +3,12 @@ from flask import render_template, current_app
 from flask_mail import Message
 from api.config.initialization import mail
 from api.modules.user.model import UserModel
+
+
 # from threading import Thread
 
 
-def send_async_email(app, msg):
+def _send_async_email(app, msg):
     with app.app_context():
         mail.send(msg)
 
@@ -18,7 +20,7 @@ def __send_email(subject, recipients, html_body):
     msg.html = html_body
     mail.send(msg)
     # app = current_app._get_current_object()  # get the real app instance
-    # Thread(target=send_async_email, args=(app, msg)).start()
+    # Thread(target=_send_async_email, args=(app, msg)).start()
 
 
 def send_password_reset_request_email(user: UserModel):
@@ -35,5 +37,17 @@ def send_password_reset_request_email(user: UserModel):
 
 def send_password_reset_confirmation_email(user: UserModel):
     __send_email('Your Password has been updated',
+                 recipients=[user.email],
+                 html_body=render_template('emailers/reset_password_request.html'))
+
+
+def send_email_signup(user: UserModel):
+    __send_email('Welcome to Muslim Friendly Travel',
+                 recipients=[user.email],
+                 html_body=render_template('emailers/reset_password_request.html'))
+
+
+def send_email_booking_confirmed(booking, user: UserModel):
+    __send_email('Congrates! your hotel has been booked',
                  recipients=[user.email],
                  html_body=render_template('emailers/reset_password_request.html'))
