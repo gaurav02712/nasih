@@ -1,5 +1,5 @@
 from api.config.initialization import ma
-from api.modules.hotel.model import HotelModel, CurrencyModel, IATACodeModel
+from api.modules.hotel.model import HotelModel, CurrencyModel, IATACodeModel, BookingModel
 
 
 class HotelSchema(ma.ModelSchema):
@@ -18,5 +18,12 @@ class CurrencySchema(ma.ModelSchema):
 class IATACodeModelSchema(ma.ModelSchema):
     class Meta:
         model = IATACodeModel
+        include_fk = True
+        exclude = model.baseExcluded()
+
+
+class HotelBookingSchema(ma.ModelSchema):
+    class Meta:
+        model = BookingModel
         include_fk = True
         exclude = model.baseExcluded()
