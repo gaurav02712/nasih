@@ -4,7 +4,7 @@ import os
 class Default(object):
     # from dotenv import load_dotenv
     basedir = os.path.abspath(os.path.dirname(__file__))
-    #load_dotenv(os.path.join(basedir, '../../.flaskenv'))
+  #  load_dotenv(os.path.join(basedir, '../../.flaskenv'))
     app_settings = os.environ.get('APP_SETTINGS')
 
     # You need to replace the next values with the appropriate values for your configuration
