@@ -1,6 +1,7 @@
 import os
 from flask import Flask
 from api.config.development import DevConfig
+# from api.config.staging import StagingConfig
 from api.config.staging import StagingConfig
 from api.helpers import errorhandler
 
@@ -21,5 +22,5 @@ def create_app(config_obj):
 env = os.environ.get('FLASK_ENV')
 en = os.environ
 config = StagingConfig if env == 'staging' else DevConfig
-app = create_app(config)
+app = create_app(DevConfig)
 app.app_context().push()

@@ -1,5 +1,6 @@
 from api.common.base.model import BaseModel
 from api.common.base.parsers import base_pagination_parser
+from api.common.enums import BookingStatus
 from api.config.initialization import db
 
 
@@ -118,17 +119,49 @@ class HotelModel(BaseModel):
         return parser
 
 
-class Booking(db.Model):
+# class BookingAssociatedRecords(db.Model):
+#     __tablename__ = 'associated_record'
+
+
+class BookingModel(BaseModel):
     __tablename__ = 'booking'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     booking_id = db.Column(db.String(45), nullable=False)
-    providerConfirmationId = db.Column(db.String(45), nullable=False)
+    providerConfirmationId = db.Column(db.String(45), nullable=False)  # GDS Confirmation Number. If you call the
+    # Provider, this Reference may be asked
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    # associated_record =
+
+    hotel_name = db.Column(db.String(45), nullable=False)
+    checking_date = db.Column(db.DateTime, nullable=False)
+    checkout_date = db.Column(db.DateTime, nullable=False)
+    number_of_guest = db.Column(db.Integer, nullable=False)
+    number_of_room = db.Column(db.Integer, nullable=False)
+    city = db.Column(db.String(30), nullable=False)
+    address = db.Column(db.String(45), nullable=False)
+    booking_status = db.Column(db.Integer, nullable=False, default=BookingStatus.CONFIRM.value)  # booking_status
+
+    # @classmethod
+    # def save_booking_info(cls, data: dict, ):
+    #     booking = BookingModel(**data)
+
+    @classmethod
+    def _get_parser_hotel_booking_details(cls):
+        from flask_restplus import reqparse
+        parser = reqparse.RequestParser(bundle_errors=True, trim=True)
+        parser.add_argument('hotel_name', type=str, required=True)
+        parser.add_argument('checking_date', type=str, required=True, help='Date Of Birth (YYYY-MM-DD)')
+        parser.add_argument('checkout_date', type=str, required=True, help='Date Of Birth (YYYY-MM-DD)')
+        # parser.add_argument('number_of_guest', type=str, required=True)
+        parser.add_argument('number_of_room', type=str, required=True)
+        parser.add_argument('city', type=str, required=True)
+        parser.add_argument('address', type=str, required=True)
+        return parser
 
     @classmethod
     def get_parser_booking(cls):
         from flask_restplus import reqparse
-        parser = reqparse.RequestParser(bundle_errors=True, trim=True)
+        parser = BookingModel._get_parser_hotel_booking_details()
         parser.add_argument('offerId', type=str, required=True)
         guests = '''sample - [
                       {
@@ -144,18 +177,18 @@ class Booking(db.Model):
                       }
                     ]'''
 
-        parser.add_argument('guests', type=str, required=True, location='json', help=guests)
-        payments = '''sample - [
-      {
-        "method": "creditCard",
-        "card": {
-          "vendorCode": "VI",
-          "cardNumber": "4111111111111111",
-          "expiryDate": "2023-01"
-        }
+        parser.add_argument('guests', type=list, required=True, location='json', help=guests)
+        payments = '''{ "payments": [
+    {
+      "method": "creditCard",
+      "card": {
+        "vendorCode": "VI",
+        "cardNumber": "4111111111111111",
+        "expiryDate": "2023-01"
       }
-    ]'''
-        parser.add_argument('payments', type=str, required=False, location='json', help=payments)
+    }
+  ]}'''
+        parser.add_argument('payments', type=list, required=False, location='json', help=payments)
 
         help = '''offerId, guests, payments and 
         optional rooms for the repartition (when used the rooms array items must match the shopping offer 

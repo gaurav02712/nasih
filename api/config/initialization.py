@@ -8,6 +8,7 @@ from flask_sqlalchemy import SQLAlchemy, Model
 from flask_restplus import Api
 from flask_bcrypt import Bcrypt
 from amadeus import Client, ResponseError
+from flask_mail import Mail
 
 from api.config.jwt_configuration import check_if_token_in_blacklist, add_claims_to_access_token, user_identity_lookup
 
@@ -62,8 +63,9 @@ api = Api(blueprint, authorizations=authorizations, title='Nasih', doc='/api/doc
 bcrypt = Bcrypt()
 amadeus = Client(
     client_id=os.environ.get('AMADEUS_CLIENT_ID'),
-    client_secret=os.environ.get('AMADEUS_CLIENT_SECRET')
-)
+    client_secret=os.environ.get('AMADEUS_CLIENT_SECRET'),
+    hostname=os.environ.get('AMADEUS_ENVIROMENT'))
+mail = Mail()
 
 # jwt class
 jwt = JWTManager()
@@ -89,12 +91,12 @@ jwt._set_error_handler_callbacks(api)
 def prepare_libraries(app):
     # bcrypt.init_app(app)
     # cache.init_app(app)
-
     db.init_app(app)
     ma.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
     bcrypt.init_app(app)
+    mail.init_app(app)
 
 
 def register_header(app):

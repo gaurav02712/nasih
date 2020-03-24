@@ -1,7 +1,9 @@
+import os
+from time import time
+import jwt
 from marshmallow import ValidationError
 
 from api.helpers.jwt_helper import JWT
-from api.modules.user_token import UserToken
 from api.modules.user.model import UserModel
 from api.modules.user.schema import UserSchema
 
@@ -25,21 +27,6 @@ def password_validation(password: str):
         raise ValidationError(f'Password length must be greater than {min_lenght}.')
 
 
-def make_admin(user_id: int):
-    user: UserModel = UserModel.get_by_id(user_id)
-    from api.helpers.response import ApiResponse
-    if user is not None:
-        from api.common.enums import RoleType
-        user.role.role_type = RoleType.SUPER_ADMIN.value
-        user.update()
-
-        tokens = UserToken.query.filter_by(user_id=user_id).all()
-        for token in tokens:
-            token.delete()
-
-    return ApiResponse.error('User not found.', 402)
-
-
 def register_social_media(json, newuser):
     from api.modules.user.role.model import UserRole
     from api.common.enums import RoleType
@@ -61,4 +48,23 @@ def register_social_media(json, newuser):
     return False
 
 
-update_parser = UserModel.get_parser_user_profile_update()
+def get_reset_password_token(user: UserModel, expires_in=600):
+    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
+    data_dict = {'reset_password': user.id, 'exp': time() + expires_in}
+    # return create_access_token(identity={JWT_SECRET_KEY: data_dict}, expires_delta=expires_in)
+    token = jwt.encode(data_dict, JWT_SECRET_KEY, algorithm='HS256').decode('utf-8')
+    decoded = jwt.decode(token, JWT_SECRET_KEY, algorithms='HS256')
+    return token
+
+
+# access_token = create_access_token(identity=user, expires_delta=expires)
+
+
+def verify_reset_password_token(token) -> UserModel:
+    try:
+        JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
+        user_id = jwt.decode(token, JWT_SECRET_KEY,
+                             algorithms=['HS256'])['reset_password']
+    except Exception as e:
+        raise e
+    return UserModel.get_by_id(user_id)

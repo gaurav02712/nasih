@@ -1,3 +1,4 @@
+from flask import g
 from sqlalchemy import or_
 
 from amadeus import ResponseError
@@ -8,7 +9,7 @@ from api.helpers.jwt_helper import jwt_required
 from api.helpers.pagination import get_paginated_list
 from api.helpers.response import ApiResponse
 from api.modules.hotel.business import format_muslim_friendly_data, get_static_data
-from api.modules.hotel.model import HotelModel, IATACodeModel, Booking
+from api.modules.hotel.model import HotelModel, IATACodeModel, BookingModel
 from api.modules.hotel.schema import IATACodeModelSchema
 
 ns_hotel = api.namespace('hotel', description='Hotel Module')
@@ -55,23 +56,54 @@ class HotelOffer(Resource):
 
 
 class HotelBooking(Resource):
-    parser = Booking().get_parser_booking()
+
+    @ns_hotel.doc(security="Authorization")
+    @jwt_required
+    def get(self, booking_id: str):
+        """Get Booking details"""
+        args = self.parser.parse_args()
+        per_page = args.limit
+        if keyword is None:
+            records = IATACodeModel.query.paginate(page=page, per_page=per_page)
+        else:
+            query = or_(IATACodeModel.name.ilike('{}%'.format(keyword)),
+                        IATACodeModel.city.ilike('{}%'.format(keyword)),
+                        IATACodeModel.country.ilike('{}%'.format(keyword)),
+                        IATACodeModel.iata.ilike('{}%'.format(keyword)))
+            records = IATACodeModel.query.filter(query).paginate(page, per_page, False)
+        return ApiResponse.success(get_paginated_list(records, IATACodeModelSchema(many=True), per_page), 200)
+
+    parser = BookingModel().get_parser_booking()
 
     # offerId = ''
     # guest name and contact
     @ns_hotel.expect(parser)
     @ns_hotel.doc(security="Authorization")
     @jwt_required
-    def get(self):
-        """All offer provided by a specific hotels"""
+    def post(self):
+        """Book specific hotels"""
         try:
             params = self.parser.parse_args()
+
             offerId = params['offerId']
-            guests = params['guests']
+            guests: list = params['guests']
             payments = params['payments']
-            # params = cleanNullItems(params)
-            hotel_booking = amadeus.booking.hotel_bookings.post(offerId, guests, payments)
-            return ApiResponse.success(hotel_booking.data, 200)
+            booking_responce = amadeus.booking.hotel_bookings.post(offerId, guests, payments)
+            booking_dict = booking_responce.data[0]
+            booking: BookingModel = BookingModel()
+            booking.booking_id = booking_dict['id']
+            booking.providerConfirmationId = booking_dict['providerConfirmationId']
+            booking.user_id = g.user_id
+            booking.hotel_name = params['hotel_name']
+            booking.checking_date = params['checking_date']
+            booking.checkout_date = params['checkout_date']
+            booking.number_of_guest = len(guests)
+            booking.number_of_room = params['number_of_room']
+            booking.city = params['city']
+            booking.address = params['address']
+            booking.save()
+
+            return ApiResponse.success(booking_dict, 200)
         except ResponseError as error:
             print(f'Error is ----------{error}')
             return ApiResponse.error(error.response.body, 402)

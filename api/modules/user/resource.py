@@ -2,16 +2,14 @@ from flask import request, g
 from flask_bcrypt import generate_password_hash
 
 from api.common import KMessages
-from api.common.base.parsers import base_pagination_parser
 from api.common.enums import RoleType
 from api.config.initialization import api
 from api.helpers.aws import AWSManager
-from api.helpers.decorators import allow
 from api.helpers.extension import Resource
 from api.helpers.jwt_helper import jwt_required, JWT
-from api.helpers.pagination import get_paginated_list
 from api.helpers.response import ApiResponse
-from api.modules.user.business import perform_login, perform_logout, password_validation, register_social_media
+from api.modules.user.business import perform_login, perform_logout, password_validation, register_social_media, \
+    verify_reset_password_token
 from api.modules.user.model import UserModel
 from api.modules.user.role.model import UserRole
 from api.modules.user.schema import UserSchema
@@ -24,26 +22,8 @@ ns_user = api.namespace('user', description='User Profile Module')
 # def index():
 #     return "Hello, World!"
 
-
-class User(Resource):
-    parser = base_pagination_parser.copy()
-
-    @ns_user.doc(security="Authorization")
-    @jwt_required
-    @ns_user.expect(parser)
-    @allow([RoleType.SUPER_ADMIN])
-    def get(self):
-        """Get user listing"""
-        args = self.parser.parse_args()
-        page = args.page
-        per_page = args.limit
-        user_paginatior = UserModel.query.paginate(page=page, per_page=per_page)
-        return ApiResponse.success(get_paginated_list(user_paginatior, UserSchema(many=True), per_page), 200)
-
-
 class UserProfile(Resource):
-
-    @ns_user.doc(params={'user_id': 'optional user id (Int value), if we need to find other user details '})
+    @ns_user.doc(params={'user_id': 'an Int value'})
     @ns_user.doc(security="Authorization")
     @jwt_required
     def get(self):
@@ -81,8 +61,8 @@ class Registration(Resource):
     def post(self):
         """Registration via Email"""
         user: UserModel = self.validObject(self.parser, UserSchema())
-        user.password = user.create_password()
         user.role = UserRole(RoleType.USER)
+        user.password = user.create_password()
         user.save()
         loggeding_data = perform_login(user)
         return ApiResponse.success(loggeding_data, 200, message=KMessages.REGISTRATION_DONE)
@@ -117,7 +97,7 @@ class LoginSocial(Resource):
 
     @ns_user.expect(parser)
     def post(self):
-        """Login/registration via Social Account"""
+        """Login via Email"""
         json = self.parser.parse_args()
         newuser = self.validObject(self.parser, UserSchema())
         user = register_social_media(json, newuser)
@@ -154,4 +134,40 @@ class UpdatePassword(Resource):
         password_validation(new_password)
         user.password = generate_password_hash(new_password).decode('utf8')
         user.update()
+        return ApiResponse.success(None, 200, message=KMessages.PASSWORD_CHANGE_SUCESSFULLY)
+
+
+class ForgetPasswrordToken(Resource):
+    parser = UserModel.get_parser_forget_password()
+
+    @ns_user.expect(parser)
+    def post(self):
+        """Get Token for Forget password"""
+        arg_json = self.parser.parse_args()
+        email = arg_json['email']
+        user: UserModel = UserModel.query.filter(UserModel.email == email).first()
+        if user:
+            from api.helpers.email import send_password_reset_request_email
+            send_password_reset_request_email(user)
+            return ApiResponse.success(None, 200, message=KMessages.RESET_PASSWORD_TOKEN_SEND)
+        return ApiResponse.error(None, 404, message=KMessages.NO_EMAIL_ID)
+
+
+class ResetPassword(Resource):
+    parser = UserModel.get_parser_reset_password()
+
+    @ns_user.expect(parser)
+    def post(self):
+        """Reset your password with token"""
+        arg_json = self.parser.parse_args()
+        user: UserModel = verify_reset_password_token(arg_json['token'])
+        if not user:
+            return ApiResponse.error(None, 404, message=KMessages.INVALID_TOKEN)
+        arg_json = self.parser.parse_args()
+        new_password = arg_json['new_password']
+        password_validation(new_password)
+        user.password = generate_password_hash(new_password).decode('utf8')
+        user.update()
+        from api.helpers.email import send_password_reset_confirmation_email
+        send_password_reset_confirmation_email(user)
         return ApiResponse.success(None, 200, message=KMessages.PASSWORD_CHANGE_SUCESSFULLY)
