@@ -1,3 +1,4 @@
+![logo](icon.JPG)
 ## Nasih - Muslim Friendly Travel Guide.
 Muslim Friendly Travel is an AI-powered hyper-personalised booking platform focused on the Muslim traveler.
 

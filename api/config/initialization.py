@@ -58,8 +58,10 @@ db = SQLAlchemy(model_class=CrudMethods)
 ma = Marshmallow()
 migrate = Migrate()
 blueprint = Blueprint('AirOrder', __name__, url_prefix='/v1')
-api = Api(blueprint, authorizations=authorizations, title='Nasih', doc='/api/doc/', version='1.0.0',
-          description='')
+api = Api(blueprint, authorizations=authorizations, title='Muslim Friendly Travel Guide', doc='/api/doc/',
+          version='1.0.0',
+          description='''Muslim Friendly Travel is an AI-powered hyper-personalised booking platform focused on the 
+          uslim traveler.''')
 bcrypt = Bcrypt()
 amadeus = Client(
     client_id=os.environ.get('AMADEUS_CLIENT_ID'),
