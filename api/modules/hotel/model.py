@@ -119,6 +119,18 @@ class HotelModel(BaseModel):
         return parser
 
 
+class FavEntityModel(BaseModel):
+    __tablename__ = 'fav_entity'
+    user_id = db.Column(db.ForeignKey('user.id'), nullable=False, index=True)
+    entity_id = db.Column(db.String(45), nullable=False)
+    entity_type = db.Column(db.INT, nullable=False, default=0)
+
+    # product = db.relationship('ProductModel')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
 # class BookingAssociatedRecords(db.Model):
 #     __tablename__ = 'associated_record'
 
