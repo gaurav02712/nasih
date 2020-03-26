@@ -5,6 +5,7 @@ Muslim Friendly Travel is an AI-powered hyper-personalised booking platform focu
 # Technology
 1. Language - Python 3.7
 2. Framework -  Flask 1.1.1
+3. Database - PostgreSQL
 
 
 # Installation
