@@ -69,6 +69,8 @@ amadeus = Client(
     hostname=os.environ.get('AMADEUS_ENVIROMENT'))
 mail = Mail()
 
+
+
 # jwt class
 jwt = JWTManager()
 jwt.token_in_blacklist_loader(check_if_token_in_blacklist)
