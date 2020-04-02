@@ -50,7 +50,9 @@ class UserProfile(Resource):
         json_data = self.update_parser.parse_args()
         profile_image = json_data['profile_image']
         if profile_image:
-            json_data['profile_image_url'] = AWSManager().updateImage(json_data['profile_image'])
+            from flask import current_app
+            directory_path = current_app.config['USER_DP_DIR']
+            json_data['profile_image_url'] = AWSManager().updateImage(profile_image, directory_path)
         user: UserModel = UserModel.get_by_id(g.user_id)
         user.update(**json_data)
         return ApiResponse.success(UserSchema().dump(user), 200)
