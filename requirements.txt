@@ -1,3 +1,4 @@
+pyfcm
 alembic==1.4.0
 amadeus==3.5.0
 aniso8601==8.0.0

@@ -1,5 +1,5 @@
 venv
-temp_export_files/
+api/temp_export_files/
 venv/bin/easy_install
 venv/bin/easy_install-3.7
 venv/bin/pip
@@ -119,3 +119,5 @@ static/
 templates/
 venv/include/
 !/api/config/development.py
+.DS_Store
+._.DS_Store

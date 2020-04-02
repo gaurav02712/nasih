@@ -32,4 +32,5 @@ class Default(object):
         'https://shipskart-2b3bb.web.app'
     ]
     TEMP_DIR = os.path.join(basedir, '../temp_export_files/')
-
+    QUESTION_ICONS_DIR = os.path.join(TEMP_DIR, 'questions_icons/')
+    USER_DP_DIR = os.path.join(TEMP_DIR, 'profile_pic/')
