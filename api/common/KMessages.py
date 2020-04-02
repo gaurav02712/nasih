@@ -18,7 +18,7 @@ QUESTION_DELETED = "Question deleted successfully"
 # INVALID_REG_TOKEN = "Invalid registration token recived."
 
 LOGOUT_DONE = "User Logout successfully"
-# UPDATED_SUCESSFULLY = "updated Successfully"
+UPDATED_SUCESSFULLY = "updated Successfully"
 # NO_OUTLET_FOUND = "No outlet found."
 #
 # DELETED_SUCESSFULLY = "deleted successfully"

@@ -1,7 +1,6 @@
 import os
 from flask import Flask
 from api.config.development import DevConfig
-# from api.config.staging import StagingConfig
 from api.config.staging import StagingConfig
 from api.helpers import errorhandler
 

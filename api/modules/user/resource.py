@@ -11,6 +11,8 @@ from api.helpers.response import ApiResponse
 from api.modules.user.business import perform_login, perform_logout, password_validation, register_social_media, \
     verify_reset_password_token
 from api.modules.user.model import UserModel
+from api.modules.user.notification.model import NotificaionModel
+from api.modules.user.notification.schema import NotificaionModelSchema
 from api.modules.user.role.model import UserRole
 from api.modules.user.schema import UserSchema
 
@@ -48,7 +50,9 @@ class UserProfile(Resource):
         json_data = self.update_parser.parse_args()
         profile_image = json_data['profile_image']
         if profile_image:
-            json_data['profile_image_url'] = AWSManager().updateImage(json_data['profile_image'])
+            from flask import current_app
+            directory_path = current_app.config['USER_DP_DIR']
+            json_data['profile_image_url'] = AWSManager().updateImage(profile_image, directory_path)
         user: UserModel = UserModel.get_by_id(g.user_id)
         user.update(**json_data)
         return ApiResponse.success(UserSchema().dump(user), 200)
@@ -171,3 +175,19 @@ class ResetPassword(Resource):
         from api.helpers.email import send_password_reset_confirmation_email
         send_password_reset_confirmation_email(user)
         return ApiResponse.success(None, 200, message=KMessages.PASSWORD_CHANGE_SUCESSFULLY)
+
+
+class UserNotification(Resource):
+    parser = NotificaionModel.get_parser_fetch_notification()
+
+    @ns_user.expect(parser)
+    @ns_user.doc(security="Authorization")
+    @jwt_required
+    def get(self):
+        """Fetch user notification"""
+        args = self.parser.parse_args()
+        page = args.page
+        per_page = args.limit
+        records = NotificaionModel.query.filter(NotificaionModel.user_id == g.user_id).paginate(page, per_page, False)
+        from api.helpers.pagination import get_paginated_list
+        return ApiResponse.success(get_paginated_list(records, NotificaionModelSchema(many=True), per_page), 200)

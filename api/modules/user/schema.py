@@ -1,10 +1,11 @@
 from marshmallow import fields, ValidationError, validates
 from api.config.initialization import ma
 from api.modules.user.model import UserModel
+from api.modules.user.role.schema import UserRoleSchema
 
 
 class UserSchema(ma.ModelSchema):
-    # date_of_birth = fields.Date('%Y-%m-%d')
+    role = fields.Nested(UserRoleSchema())
     password = fields.String(load_only=True)
 
     @validates("password")

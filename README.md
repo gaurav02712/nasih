@@ -1,9 +1,11 @@
+![logo](icon.JPG)
 ## Nasih - Muslim Friendly Travel Guide.
 Muslim Friendly Travel is an AI-powered hyper-personalised booking platform focused on the Muslim traveler.
 
 # Technology
 1. Language - Python 3.7
 2. Framework -  Flask 1.1.1
+3. Database - PostgreSQL
 
 
 # Installation

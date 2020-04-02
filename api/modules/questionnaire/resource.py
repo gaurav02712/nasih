@@ -1,8 +1,9 @@
-from flask import request, g
+from flask import request, g, current_app
 
 from api.common import KMessages
 from api.common.enums import RoleType
 from api.config.initialization import api
+from api.helpers.aws import AWSManager
 from api.helpers.decorators import allow
 from api.helpers.extension import Resource
 from api.helpers.jwt_helper import jwt_required
@@ -19,7 +20,7 @@ class Question(Resource):
     # @ns_questionnaire.doc(params={'user_id': 'an Int value'})
     @ns_questionnaire.doc(security="Authorization")
     @jwt_required
-    # @allow([RoleType.SUPER_ADMIN])
+    @allow([RoleType.SUPER_ADMIN])
     def get(self):
         """Get all questionnaire"""
         questions = QuestionModel().find_all()
@@ -28,18 +29,22 @@ class Question(Resource):
 
     create_question_parser = QuestionModel.get_parser_create_new_question()
 
-    @ns_questionnaire.doc(security="Authorization")
-    @jwt_required
+    # @ns_questionnaire.doc(security="Authorization")
+    # @jwt_required
     @ns_questionnaire.expect(create_question_parser)
-    @allow([RoleType.SUPER_ADMIN])
+    # @allow([RoleType.SUPER_ADMIN])
     def post(self):
         """add new questionnaire and options"""
         param_dict = self.create_question_parser.parse_args()
         question = QuestionModel(**{'question': param_dict['question']})
-        icons = list(param_dict['option_icon_name'])
+        option_icons = list(param_dict['option_icons'])
+
         for num, option in enumerate(param_dict['option']):
-            option: QOptionsModel = QOptionsModel(**{'option': option, 'option_icon_name': icons[num]})
+            option: QOptionsModel = QOptionsModel(**{'option': option})
+            directory_path = current_app.config['QUESTION_ICONS_DIR']
+            option.option_icon = AWSManager().updateImage(option_icons[num], directory_path)
             question.options.append(option)
+        # TODO: Have to delete saved file if there will any expection while saving question
         question.save()
         return ApiResponse.success(QuestionSchema().dump(question), 200)
 

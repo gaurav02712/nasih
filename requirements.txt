@@ -1,3 +1,4 @@
+pyfcm
 alembic==1.4.0
 amadeus==3.5.0
 aniso8601==8.0.0
@@ -6,12 +7,13 @@ attrs==19.3.0
 bcrypt==3.1.7
 blinker==1.4
 boto3==1.12.7
-botocore==1.15.27
+botocore==1.15.7
+certifi==2019.11.28
 cffi==1.14.0
 Click==7.0
 devconfig==0.4.8
 distlib==0.3.0
-docutils==0.14
+docutils==0.16
 docutils-stubs==0.0.21
 filelock==3.0.12
 Flask==1.1.1
