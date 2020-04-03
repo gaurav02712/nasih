@@ -33,8 +33,8 @@ class UserModel(BaseModel):
     def validate_email(self, key, email):
         if not re.match("[^@]+@[^@]+\.[^@]+", email):
             raise ValidationError('Not a valid email id.')
-        elif UserModel.query.filter(UserModel.email == email).first():
-            raise ValidationError('Email id is alredy registered.')
+        # elif UserModel.query.filter(UserModel.email == email).first():
+        #     raise ValidationError('Email id is alredy registered.')
         else:
             return email
 
@@ -62,6 +62,16 @@ class UserModel(BaseModel):
         options = ['nasih', 'google', 'facebook']
         parser.add_argument('register_by', required=True, choices=options, type=str, help='facebook/google')
         parser.replace_argument('date_of_birth', required=False, type=str, help='Date Of Birth (YYYY-MM-DD)')
+        return parser
+
+    @classmethod
+    def get_parser_user_login_social(cls):
+        parser = UserModel.get_parser_user_registration_social()
+        options = ['nasih', 'google', 'facebook']
+        parser.replace_argument('register_by', required=True, choices=options, type=str, help='facebook/google')
+        parser.replace_argument('f_name', required=False, type=str)
+        parser.replace_argument('l_name', required=False, type=str)
+        parser.replace_argument('email', required=False, type=str)
         return parser
 
     @classmethod

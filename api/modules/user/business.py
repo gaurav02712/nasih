@@ -26,6 +26,27 @@ def password_validation(password: str):
     if len(password) < min_lenght:
         raise ValidationError(f'Password length must be greater than {min_lenght}.')
 
+def register_socially(json, newuser):
+    from api.modules.user.role.model import UserRole
+    from api.common.enums import RoleType
+    user = UserModel.query.filter(UserModel.social_id == json['social_id'], UserModel.is_deleted == False).first()
+    if user is None:
+        new_user = self.validObject(self.parser, UserSchema())
+
+        user = UserModel.query.filter(UserModel.email == json['email'], UserModel.is_deleted == False).first()
+        if user:
+            user.social_id = json['social_id']
+            user.register_by = user.register_by if user.register_by else json['register_by']
+            user.f_name = user.f_name if user.f_name else json['f_name']
+            user.l_name = user.l_name if user.l_name else json['l_name']
+            user.updtae()
+        else:
+            user = newuser
+            user.role = UserRole(RoleType.USER)
+            user.save()
+        return user
+    else:
+        return user
 
 def register_social_media(json, newuser):
     from api.modules.user.role.model import UserRole
@@ -44,6 +65,8 @@ def register_social_media(json, newuser):
                 user = newuser
                 user.role = UserRole(RoleType.USER)
                 user.save()
+            return user
+        else:
             return user
     return False
 
