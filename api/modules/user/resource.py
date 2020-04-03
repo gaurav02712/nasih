@@ -79,10 +79,6 @@ class Login(Resource):
     def post(self):
         """Login via Email"""
         json = self.parser.parse_args()
-        user = register_social_media(json)
-        if user:
-            loggeding_data = perform_login(user)
-            return ApiResponse.success(loggeding_data, 200, message=KMessages.LOGIN_DONE)
         userquery = UserModel.query.filter(UserModel.email == json['email'], UserModel.is_deleted == False)
         user = userquery.first()
         if user is not None:
@@ -97,19 +93,25 @@ class Login(Resource):
 
 
 class LoginSocial(Resource):
-    parser = UserModel.get_parser_user_registration_social()
+    login_parser = UserModel.get_parser_user_login_social()
 
-    @ns_user.expect(parser)
+    @ns_user.expect(login_parser)
     def post(self):
-        """Login via Email"""
-        json = self.parser.parse_args()
-        newuser = self.validObject(self.parser, UserSchema())
-        user = register_social_media(json, newuser)
-        if user:
-            loggeding_data = perform_login(user)
-            return ApiResponse.success(loggeding_data, 200, message=KMessages.LOGIN_DONE)
-        return ApiResponse.error(None, 404, message=KMessages.INVALID_LOGIN_AUTH)
+        """Login via Social id/Registration via social id & detail"""
+        json = self.login_parser.parse_args()
+        social_id = json['social_id']
 
+        user = UserModel.query.filter(UserModel.social_id == social_id, UserModel.is_deleted == False).first()
+        message = KMessages.LOGIN_DONE
+        if user is None:
+            parser_registration = UserModel.get_parser_user_registration_social()
+            new_user: UserModel = self.validObject(parser_registration, UserSchema())
+            new_user.role = UserRole(RoleType.USER)
+            new_user.save()
+            user = new_user
+            message = KMessages.REGISTRATION_DONE
+        loggeding_data = perform_login(user)
+        return ApiResponse.success(loggeding_data, 200, message=message)
 
 class Logout(Resource):
     @ns_user.doc(security="Authorization")
