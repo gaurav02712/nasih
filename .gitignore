@@ -1,4 +1,5 @@
 venv
+nasih-venv/
 api/temp_export_files/
 venv/bin/easy_install
 venv/bin/easy_install-3.7
