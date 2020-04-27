@@ -6,9 +6,9 @@ from api.config.initialization import blueprint, prepare_libraries, register_hea
 from api.helpers import errorhandler
 
 
-def create_app():
+def create_app(config):
     app = Flask(__name__)
-    app.config.from_object(app_settings)
+    app.config.from_object(config)
     prepare_libraries(app)
     app.register_blueprint(blueprint)
     errorhandler.register_error_handlers(app)
@@ -41,6 +41,6 @@ def _check_config_variables_are_set(config):
             'FCM_API_KEY is not set, set it in the production config file.'
 
 
-app = create_app()
+app = create_app(app_settings)
 app.app_context().push()
 _check_config_variables_are_set(app.config)
