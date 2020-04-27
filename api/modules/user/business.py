@@ -1,11 +1,13 @@
 import os
 from time import time
 import jwt
+from itsdangerous import URLSafeTimedSerializer
 from marshmallow import ValidationError
 
 from api.helpers.jwt_helper import JWT
 from api.modules.user.model import UserModel
 from api.modules.user.schema import UserSchema
+from flask import current_app
 
 
 def perform_login(user: UserModel) -> dict:
@@ -25,6 +27,7 @@ def password_validation(password: str):
     min_lenght = 5
     if len(password) < min_lenght:
         raise ValidationError(f'Password length must be greater than {min_lenght}.')
+
 
 def register_socially(json, newuser):
     from api.modules.user.role.model import UserRole
@@ -47,6 +50,7 @@ def register_socially(json, newuser):
         return user
     else:
         return user
+
 
 def register_social_media(json, newuser):
     from api.modules.user.role.model import UserRole
@@ -91,3 +95,21 @@ def verify_reset_password_token(token) -> UserModel:
     except Exception as e:
         raise e
     return UserModel.get_by_id(user_id)
+
+
+def generate_confirmation_token(email):
+    serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+    return serializer.dumps(email, salt=current_app.config['SECURITY_PASSWORD_SALT'])
+
+
+def confirm_token(token, expiration=3600):
+    serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+    try:
+        result = serializer.loads(
+            token,
+            salt=current_app.config['SECURITY_PASSWORD_SALT'],
+            max_age=expiration
+        )
+    except:
+        return False
+    return result

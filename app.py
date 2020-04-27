@@ -1,25 +1,46 @@
 import os
 from flask import Flask
-from api.config.development import DevConfig
-from api.config.staging import StagingConfig
+
+from api.config.default import app_settings
+from api.config.initialization import blueprint, prepare_libraries, register_header
 from api.helpers import errorhandler
 
-app = Flask(__name__)
 
-
-def create_app(config_obj):
-    from api.config.initialization import blueprint, prepare_libraries, register_header
-    app.config.from_object(config_obj)
+def create_app():
+    app = Flask(__name__)
+    app.config.from_object(app_settings)
     prepare_libraries(app)
     app.register_blueprint(blueprint)
     errorhandler.register_error_handlers(app)
     register_header(app)
-    # clear_session_with_rollback()
     return app
 
 
-env = os.environ.get('FLASK_ENV')
-en = os.environ
-config = StagingConfig if env == 'staging' else DevConfig
-app = create_app(DevConfig)
+def _check_config_variables_are_set(config):
+
+    assert config['SERVER_NAME'] is not None, \
+        'SERVER_NAME is not set, set the env variable SERVER_NAME ' \
+        'or SERVER_NAME in the production config file.'
+
+    assert config['DATABASE_HOST'] is not None, \
+        'DATABASE_HOST is not set, set the env variable DATABASE_HOST ' \
+        'or DATABASE_HOST in the production config file.'
+
+    assert config['DATABASE_USER'] is not None, \
+        'DATABASE_USER is not set, set the env variable DATABASE_USER ' \
+        'or DATABASE_USER in the production config file.'
+
+    assert config['DATABASE_NAME'] is not None, \
+        'DATABASE_NAME is not set, set the env variable DATABASE_NAME ' \
+        'or DATABASE_NAME in the production config file.'
+
+    if os.environ['APP_SETTINGS'] == 'project.config.production.ProductionConfig':
+        assert config['FCM_API_KEY'] is not None,\
+            'FCM_API_KEY is not set, set it in the production config file.'
+        assert config['FCM_API_KEY'] is not None,\
+            'FCM_API_KEY is not set, set it in the production config file.'
+
+
+app = create_app()
 app.app_context().push()
+_check_config_variables_are_set(app.config)
