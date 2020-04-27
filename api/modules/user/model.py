@@ -1,12 +1,13 @@
 import re
+
 from flask_bcrypt import generate_password_hash, check_password_hash
+from flask_restplus import reqparse
 from marshmallow import ValidationError
+from sqlalchemy.orm import validates
 from werkzeug.datastructures import FileStorage
+
 from api.common.base.model import BaseModel
 from api.config.initialization import db
-from flask_restplus import reqparse
-from sqlalchemy.orm import validates
-from api.modules.user.role.model import UserRole
 
 
 class UserModel(BaseModel):
@@ -14,10 +15,10 @@ class UserModel(BaseModel):
     f_name = db.Column(db.String(45), nullable=False)
     l_name = db.Column(db.String(45), nullable=False)
     email = db.Column(db.String(45), nullable=False, unique=True)
-    password = db.Column(db.String(355), nullable=True, unique=False)
+    password_hash = db.Column(db.String(128), nullable=True, unique=False)
     username = db.Column(db.String(45), nullable=True, unique=True)
     date_of_birth = db.Column(db.Date)
-    is_varified = db.Column(db.Integer, nullable=False, default=0)
+    email_verified = db.Column(db.Boolean, nullable=False, default=False)
     social_id = db.Column(db.String(50), nullable=True)
     register_by = db.Column(db.String(50), nullable=True, default='Nasih')
     device = db.relationship('DeviceInfoModel', cascade="all,delete")
@@ -27,19 +28,25 @@ class UserModel(BaseModel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.username = kwargs.get('username', self.email)
-        # self.password = generate_password_hash(self.password).decode('utf8')
 
     @validates('email')
     def validate_email(self, key, email):
         if not re.match("[^@]+@[^@]+\.[^@]+", email):
             raise ValidationError('Not a valid email id.')
-        # elif UserModel.query.filter(UserModel.email == email).first():
-        #     raise ValidationError('Email id is alredy registered.')
         else:
             return email
 
-    def create_password(self):
-        return generate_password_hash(self.password).decode('utf8')
+    @property
+    def password(self):
+        # raise AttributeError('password: write-only field')
+        return self.password_hash
+
+    @password.setter
+    def password(self, password):
+        min_length = 5
+        if len(password) < min_length:
+            raise ValidationError(f'Password length must be greater than {min_length}.')
+        self.password_hash = generate_password_hash(password).decode('utf-8')
 
     def check_password(self, password):
         return check_password_hash(self.password, password)
@@ -105,8 +112,8 @@ class UserModel(BaseModel):
     @classmethod
     def get_parser_reset_password(cls):
         parser = reqparse.RequestParser(bundle_errors=True, trim=True)
-        parser.add_argument('token', required=True, type=str)
-        parser.add_argument('new_password', required=True, type=str)
+        parser.add_argument('token', required=True, type=str, location='args')
+        parser.add_argument('new_password', required=True, type=str, location='form')
         return parser
 
 
