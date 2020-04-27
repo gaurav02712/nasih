@@ -3,7 +3,7 @@ from datetime import timedelta
 from api.config.default import Default
 
 
-class DevConfig(Default):
+class DevelopmentConfig(Default):
     """Development configuration."""
     DEBUG = True
     DB_URL = os.environ.get('DB_URL')
