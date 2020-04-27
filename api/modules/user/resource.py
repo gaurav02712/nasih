@@ -69,7 +69,7 @@ class Registration(Resource):
         user.role = UserRole(RoleType.USER)
         user.save()
         logged_in_data = perform_login(user)
-        return ApiResponse.success(logged_in_data, 200, message=KMessages.REGISTRATION_DONE)
+        return ApiResponse.success(logged_in_data, 201, message=KMessages.REGISTRATION_DONE)
 
 
 class Login(Resource):

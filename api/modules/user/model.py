@@ -106,13 +106,13 @@ class UserModel(BaseModel):
     @classmethod
     def get_parser_forget_password(cls):
         parser = reqparse.RequestParser(bundle_errors=True, trim=True)
-        parser.add_argument('email', required=True, type=str)
+        parser.add_argument('email', required=True, type=str, location='form')
         return parser
 
     @classmethod
     def get_parser_reset_password(cls):
         parser = reqparse.RequestParser(bundle_errors=True, trim=True)
-        parser.add_argument('token', required=True, type=str, location='args')
+        parser.add_argument('token', required=True, type=str, location='form')
         parser.add_argument('new_password', required=True, type=str, location='form')
         return parser
 
