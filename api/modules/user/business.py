@@ -84,9 +84,6 @@ def get_reset_password_token(user: UserModel, expires_in=600):
     return token
 
 
-# access_token = create_access_token(identity=user, expires_delta=expires)
-
-
 def verify_reset_password_token(token) -> UserModel:
     try:
         JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
