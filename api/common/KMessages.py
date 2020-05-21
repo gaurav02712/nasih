@@ -19,6 +19,8 @@ QUESTION_DELETED = "Question deleted successfully"
 
 LOGOUT_DONE = "User Logout successfully"
 UPDATED_SUCESSFULLY = "updated Successfully"
+
+LOCATION_OR_CITY_REQUIRED = 'One of Latitude/Longitude or City Code is required'
 # NO_OUTLET_FOUND = "No outlet found."
 #
 # DELETED_SUCESSFULLY = "deleted successfully"

@@ -51,3 +51,8 @@ class Default(object):
     MAIL_USE_SSL = True
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+
+    # AMADEUS
+    AMADEUS_HOST = os.environ.get('AMADEUS_HOST')
+    AMADEUS_USERNAME = os.environ.get('AMADEUS_USERNAME')
+    AMADEUS_OFFICE_ID = os.environ.get('AMADEUS_OFFICE_ID')

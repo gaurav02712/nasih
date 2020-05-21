@@ -13,27 +13,42 @@ from api.helpers.response import ApiResponse
 from api.modules.hotel.business import format_muslim_friendly_data, get_static_data
 from api.modules.hotel.model import HotelModel, IATACodeModel, BookingModel, FavEntityModel
 from api.modules.hotel.schema import IATACodeModelSchema, HotelBookingSchema, FavEntitySchema
+from api.modules.amadeus import AmadeusClient
+from .parser import get_hotel_parser, get_hotels_parser
 
-ns_hotel = api.namespace('hotel', description='Hotel Module')
+ns_hotel = api.namespace('hotels', description='Hotel Module')
 
 
 class Hotel(Resource):
-    parser = HotelModel().get_parser_hotel_filters()
+    # parser = HotelModel().get_parser_hotel_filters()
 
-    @ns_hotel.expect(parser)
-    @ns_hotel.doc(security="Authorization")
-    @jwt_required
-    def get(self):
+    @ns_hotel.expect(get_hotel_parser)
+    # @ns_hotel.doc(security="Authorization")
+    # @jwt_required
+    def post(self, hotel_code):
         try:
-            params = self.parser.parse_args()
-            if params['childAges'] is not None:
-                params['childAges'] = list_to_csv(params['childAges'])
-            if params['ratings'] is not None:
-                params['ratings'] = list_to_csv(params['ratings'])
-            params = cleanNullItems(params)
-            response = amadeus.shopping.hotel_offers.get(**params)
-            mf_data = format_muslim_friendly_data(response.data)
-            return ApiResponse.success(mf_data, 200)
+            params = get_hotel_parser.parse_args()
+            params['hotel_code'] = hotel_code
+            response = AmadeusClient.get_hotel(**params)
+            return ApiResponse.success(response, 200)
+        except ResponseError as error:
+            print(f'Error is ----------{error}')
+            return ApiResponse.error(error.response.body, 402)
+
+
+class Hotels(Resource):
+    # parser = HotelModel().get_parser_hotel_filters()
+
+    @ns_hotel.expect(get_hotels_parser)
+    # @ns_hotel.doc(security="Authorization")
+    # @jwt_required
+    def post(self):
+        try:
+            params = get_hotels_parser.parse_args()
+            if (params.latitude is None or params.longitude is None) and params.city_code is None:
+                return ApiResponse.error(None, 400, message=KMessages.LOCATION_OR_CITY_REQUIRED)
+            response = AmadeusClient.get_hotels(**params)
+            return ApiResponse.success(response, 200)
         except ResponseError as error:
             print(f'Error is ----------{error}')
             return ApiResponse.error(error.response.body, 402)
@@ -59,10 +74,9 @@ class HotelOffer(Resource):
 
 class HotelBooking(Resource):
     booking_parser = base_pagination_parser.copy()
-
     @ns_hotel.expect(booking_parser)
     @ns_hotel.doc(security="Authorization")
-    @jwt_required
+    # @jwt_required
     def get(self, booking_id: str = None):
         """Get user booking lisitng and booking with booking_id"""
         if booking_id is not None:
@@ -90,8 +104,8 @@ class HotelBooking(Resource):
             offerId = params['offerId']
             guests: list = params['guests']
             payments = params['payments']
-            booking_responce = amadeus.booking.hotel_bookings.post(offerId, guests, payments)
-            booking_dict = booking_responce.data[0]
+            booking_response = amadeus.booking.hotel_bookings.post(offerId, guests, payments)
+            booking_dict = booking_response.data[0]
             booking: BookingModel = BookingModel()
             booking.booking_id = booking_dict['id']
             booking.providerConfirmationId = booking_dict['providerConfirmationId']
